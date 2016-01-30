@@ -81,6 +81,9 @@ void GameManager::loadGameFromFile(std::string gamefile){
 	//Read gamefile to store game properties (objects, sprites, etc)
 	using namespace std;
 
+	textures_.clear();
+	objects_.clear();
+
 	ifstream fin(gamefile);
 	string line;
 	CFG_TYPE type = TYPE_NONE;
@@ -95,7 +98,11 @@ void GameManager::loadGameFromFile(std::string gamefile){
 			//Check if prefix signifies that the next line is a saved value
 			if (prefix == PREFIX_PROP){
 				if (type == TYPE_OBJ){
-					current_obj->addProperty(prop, line);
+					std::string p = line;
+					if (p[0] == '\''){ //if property starts with ', it is in quotes, so we need to remove quotes
+						p = p.substr(1, p.length()-2);
+					}
+					current_obj->addProperty(prop, p);
 				}
 				else if (type == TYPE_TEX){
 					if (prop == "filename"){
@@ -173,12 +180,15 @@ void GameManager::keyPressed(sf::Keyboard::Key key){
 	using namespace sf;
 	if (key == Keyboard::Q){
 		selected_++;
-		if (selected_ > objects_.size()){
+		if (selected_ >= objects_.size()){
 			selected_ = 0;
 		}
 	}
 	else if (key == Keyboard::S){
-		saveGame("testgame.level");
+		saveLevel("testgame.level");
+	}
+	else if (key == Keyboard::L){
+		loadLevelFromFile("testgame.level");
 	}
 }
 
@@ -202,6 +212,8 @@ void GameManager::loadLevelFromFile(std::string filename){
 	CFG_TYPE type = TYPE_NONE;
 	CFG_PREFIX prefix = PREFIX_NONE;
 
+	entities_.clear();
+
 	while (getline(fin,line)){
 		type = TYPE_NONE;
 		prefix = PREFIX_NONE;
@@ -212,13 +224,13 @@ void GameManager::loadLevelFromFile(std::string filename){
 			if (type == TYPE_NONE){
 				if (word == "obj"){
 					type = TYPE_OBJ;
-					prefix = PREFIX_NONE;
+					current_entity = new Entity(this);
+					addEntity(current_entity);
+					prefix = PREFIX_NEXT;
 				}
 			}
 			else if (type == TYPE_OBJ){
 				if (prefix == PREFIX_NONE){
-					current_entity = new Entity(this);
-					addEntity(current_entity);
 					prefix = PREFIX_NEXT;
 				}
 				else if (prefix == PREFIX_NEXT){
@@ -254,7 +266,7 @@ void GameManager::saveLevel(std::string filename){
 		string name = it->getType().getName();
 		maths::Vector2 pos = it->getPosition();
 		string pos_str = to_string(pos.x) + " " + to_string(pos.y);
-		string str = "obj name" + name + " pos " + pos_str + "\n";
+		string str = "obj name " + name + " pos " + pos_str + "\n";
 		fout << str;
 	}
 	fout.close();

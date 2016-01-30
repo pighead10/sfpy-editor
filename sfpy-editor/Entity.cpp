@@ -7,8 +7,9 @@ Entity::Entity(GameManager* gameManager): gameManager_(gameManager){
 }
 
 Entity::Entity(GameManager* gameManager, Object* type, maths::Vector2 position)
-:gameManager_(gameManager),type_(type),position_(position){
+:gameManager_(gameManager),type_(type){
 	init_sprite();
+	setPosition(position);
 }
 
 Entity::~Entity(){
