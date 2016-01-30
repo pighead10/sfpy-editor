@@ -18,6 +18,8 @@ public:
 
 	std::string getProperty(std::string name) const;
 	std::string getName() const;
+
+	const PropertyMap& getProperties() const;
 private:
 	std::string name_;
 	PropertyMap properties_;

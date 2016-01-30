@@ -3,7 +3,7 @@
 Object::Object(){
 }
 
-Object::Object(){
+Object::~Object(){
 }
 
 void Object::addProperty(std::string name, std::string value){
@@ -26,4 +26,8 @@ std::string Object::getProperty(std::string name) const{
 	else{
 		return properties_.at(name);
 	}
+}
+
+const PropertyMap& Object::getProperties() const{
+	return properties_;
 }

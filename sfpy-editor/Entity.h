@@ -9,7 +9,8 @@ class GameManager;
 
 class Entity{
 public:
-	Entity(maths::Vector2 position, Object* type, GameManager* gameManager);
+	Entity(GameManager* gameManager);
+	Entity(GameManager* gameManager, Object* type_, maths::Vector2 position);
 	~Entity();
 
 	void setPosition(maths::Vector2 position);
@@ -17,6 +18,8 @@ public:
 
 	const sf::Sprite& getSprite() const;
 	const Object& getType() const;
+
+	void setType(Object* type);
 private:
 	void init_sprite();
 

@@ -3,11 +3,20 @@
 #include "Texture.h"
 #include "GameManager.h"
 
-Entity::Entity(maths::Vector2 position, Object* type, GameManager* gameManager) :type_(type),gameManager_(gameManager){
+Entity::Entity(GameManager* gameManager): gameManager_(gameManager){
+}
+
+Entity::Entity(GameManager* gameManager, Object* type, maths::Vector2 position)
+:gameManager_(gameManager),type_(type),position_(position){
 	init_sprite();
 }
 
 Entity::~Entity(){
+}
+
+void Entity::setType(Object* type){
+	type_ = type;
+	init_sprite();
 }
 
 void Entity::init_sprite(){

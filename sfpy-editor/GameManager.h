@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
+#include "Vector2.h"
 
 class Object;
 class Texture;
@@ -18,6 +19,7 @@ public:
 	~GameManager();
 
 	void loadGameFromFile(std::string filename);
+	void loadLevelFromFile(std::string filename);
 
 	void saveLevel(std::string filename);
 	void saveGame(std::string filename);
@@ -26,7 +28,15 @@ public:
 	Object* getObjectByName(std::string name);
 
 	void run();
+	void loadAll();
+
+	void addEntity(Entity* entity);
+	void addObject(Object* object);
+	void addTexture(Texture* texture);
 private:
+	void mouseClicked(sf::Mouse::Button button, maths::Vector2 mousePosition);
+	void keyPressed(sf::Keyboard::Key key);
+
 	void render(sf::RenderWindow* window);
 
 	enum CFG_TYPE{
@@ -40,7 +50,10 @@ private:
 		PREFIX_NONE,
 		PREFIX_TYPE,
 		PREFIX_PROP,
-		PREFIX_NAME
+		PREFIX_NAME,
+		PREFIX_NEXT,
+		PREFIX_POSX,
+		PREFIX_POSY,
 	};
 
 	ObjectList objects_; //object types
@@ -48,4 +61,7 @@ private:
 	EntityList entities_; //entities placed in world
 
 	std::string game_name_;
+
+	//test
+	int selected_;
 };
