@@ -13,7 +13,7 @@ public:
 	~Object();
 
 
-	void addProperty(std::string name, std::string value);
+	void setProperty(std::string name, std::string value);
 	void setName(std::string name);
 
 	std::string getProperty(std::string name) const;

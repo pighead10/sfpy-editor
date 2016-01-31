@@ -6,7 +6,7 @@
 #include "Object.h"
 #include "Texture.h"
 #include "Entity.h"
-
+#include "Gui.h"
 
 
 //TODO global scripts!!
@@ -46,18 +46,28 @@ Object* GameManager::getObjectByName(std::string name){
 	return NULL;
 }
 
+
 void GameManager::run(){
+
 	sf::VideoMode vm(1024, 768);
 	sf::RenderWindow window;
 	window.create(vm, game_name_);
+
+	window.resetGLStates();
 
 	bool exit_ = false;
 
 	loadAll();
 
+	gui_ = std::unique_ptr<Gui>(new Gui(this));
+	gui_->run();
+
+	sf::Clock clock;
+
 	while (!exit_){
 		sf::Event evt;
 		while (window.pollEvent(evt)){
+			gui_->handleEvent(evt);
 			if (evt.type == sf::Event::Closed){
 				exit_ = true;
 			}
@@ -68,9 +78,11 @@ void GameManager::run(){
 				keyPressed(evt.key.code);
 			}
 		}
+		gui_->update(clock.restart().asSeconds());
 
 		window.clear(sf::Color::White);
 		render(&window);
+		gui_->display(&window);
 		window.display();
 	}
 
@@ -102,7 +114,7 @@ void GameManager::loadGameFromFile(std::string gamefile){
 					if (p[0] == '\''){ //if property starts with ', it is in quotes, so we need to remove quotes
 						p = p.substr(1, p.length()-2);
 					}
-					current_obj->addProperty(prop, p);
+					current_obj->setProperty(prop, p);
 				}
 				else if (type == TYPE_TEX){
 					if (prop == "filename"){
@@ -183,12 +195,19 @@ void GameManager::keyPressed(sf::Keyboard::Key key){
 		if (selected_ >= objects_.size()){
 			selected_ = 0;
 		}
+		gui_->objectSelected(objects_[selected_].get());
 	}
 	else if (key == Keyboard::S){
 		saveLevel("testgame.level");
 	}
+	else if (key == Keyboard::P){
+		saveGame("testgame2.game");
+	}
 	else if (key == Keyboard::L){
 		loadLevelFromFile("testgame.level");
+	}
+	else if (key == Keyboard::O){
+		loadGameFromFile("testgame2.game");
 	}
 }
 
@@ -274,11 +293,11 @@ void GameManager::saveLevel(std::string filename){
 
 void GameManager::saveGame(std::string filename){
 	using namespace std;
-	ifstream fout(filename);
+	ofstream fout(filename);
 
 	string game_str = "$type game\n$name\n" + game_name_ + "\n\n";
 
-	fout >> game_str;
+	fout << game_str;
 
 	for (auto& it : objects_){
 		string s = "$type obj\n";
@@ -289,7 +308,7 @@ void GameManager::saveGame(std::string filename){
 			s += prop.second + "\n";
 		}
 		s += "\n";
-		fout >> s;
+		fout << s;
 	}
 	
 	for (auto& it : textures_){
@@ -299,7 +318,7 @@ void GameManager::saveGame(std::string filename){
 		s += "$prop filename\n";
 		s += it->getFilename() + "\n";
 		s += "\n";
-		fout >> s;
+		fout << s;
 	}
 	fout.close();
 }

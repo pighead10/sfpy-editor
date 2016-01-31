@@ -6,7 +6,7 @@ Object::Object(){
 Object::~Object(){
 }
 
-void Object::addProperty(std::string name, std::string value){
+void Object::setProperty(std::string name, std::string value){
 	properties_[name] = value;
 }
 

@@ -8,6 +8,7 @@
 class Object;
 class Texture;
 class Entity;
+class Gui;
 
 typedef std::vector<std::unique_ptr<Object>> ObjectList;
 typedef std::vector<std::unique_ptr<Texture>> TextureList;
@@ -61,6 +62,8 @@ private:
 	EntityList entities_; //entities placed in world
 
 	std::string game_name_;
+
+	std::unique_ptr<Gui> gui_;
 
 	//test
 	int selected_;
