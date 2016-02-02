@@ -4,7 +4,8 @@ class Object;
 
 class ObjectWindow : public PropertyWindow{
 public:
-	ObjectWindow(Gui* parent, GameManager* game_manager, std::string name); //no constructor inheritance in VS2013 :(
+	ObjectWindow(Gui* parent, GameManager* game_manager, std::string name,MenuItem* menu_item); //no constructor inheritance in VS2013 :(
+	~ObjectWindow();
 protected:
 	void applySettings();
 	void createElements();

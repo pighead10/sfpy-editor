@@ -19,9 +19,9 @@ public:
 	const sf::Sprite& getSprite() const;
 	const Object& getType() const;
 
+	void updateSprite();
 	void setType(Object* type);
 private:
-	void init_sprite();
 
 	sf::Sprite sprite_;
 

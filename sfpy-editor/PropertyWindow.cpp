@@ -1,18 +1,20 @@
 #include "PropertyWindow.h"
 #include "Gui.h"
+#include "MenuItem.h"
 
 PropertyWindow::PropertyWindow(){
 }
 
-PropertyWindow::PropertyWindow(Gui* parent,GameManager* game_manager,std::string name){
-	construct(parent, game_manager, name);
+PropertyWindow::PropertyWindow(Gui* parent,GameManager* game_manager,std::string name,MenuItem* menu_item){
+	construct(parent, game_manager, name,menu_item);
 }
 
 PropertyWindow::~PropertyWindow(){
 }
 
-void PropertyWindow::construct(Gui* parent,GameManager* game_manager,std::string name){
+void PropertyWindow::construct(Gui* parent,GameManager* game_manager,std::string name,MenuItem* menu_item){
 	using namespace sfg;
+	menu_item_ = menu_item;
 	parent_ = parent;
 	game_manager_ = game_manager;
 	name_ = name;
@@ -23,18 +25,33 @@ void PropertyWindow::construct(Gui* parent,GameManager* game_manager,std::string
 	subscribeEvents();
 }
 
+Gui::GUI_TYPE PropertyWindow::getType() const{
+	return type_;
+}
+
 std::string PropertyWindow::getName() const{
 	return name_;
 }
 
+void PropertyWindow::setName(std::string name){
+	name_ = name;
+	menu_item_->setName(name);
+}
+
 void PropertyWindow::makeActive(){
+	parent_->getDesktop()->BringToFront(window_);
 	//window_->SetActiveWidget();
 }
 
 void PropertyWindow::onWindowClosed(){
 	using namespace sfg;
 	auto widget = Context::Get().GetActiveWidget();
+
+	while(widget->GetName() != "Window"){
+		widget = widget->GetParent();
+	}
 	parent_->getDesktop()->Remove(widget);
+
 	parent_->removeWindow(this);
 }
 

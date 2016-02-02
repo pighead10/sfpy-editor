@@ -34,7 +34,13 @@ public:
 	void addEntity(Entity* entity);
 	void addObject(Object* object);
 	void addTexture(Texture* texture);
+
+	void objectSelected(std::string name);
+	void updateAllEntitySprites(Object* object);
 private:
+	void addObjToGui(Object* object);
+	void addTexToGui(Texture* texture);
+
 	void mouseClicked(sf::Mouse::Button button, maths::Vector2 mousePosition);
 	void keyPressed(sf::Keyboard::Key key);
 
@@ -65,6 +71,5 @@ private:
 
 	std::unique_ptr<Gui> gui_;
 
-	//test
-	int selected_;
+	Object* selected_;
 };

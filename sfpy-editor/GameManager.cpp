@@ -14,7 +14,7 @@
 //TODO backup files
 
 GameManager::GameManager(){
-	selected_ = 0;
+	selected_ = NULL;
 }
 
 GameManager::~GameManager(){
@@ -48,7 +48,6 @@ Object* GameManager::getObjectByName(std::string name){
 
 
 void GameManager::run(){
-
 	sf::VideoMode vm(1024, 768);
 	sf::RenderWindow window;
 	window.create(vm, game_name_);
@@ -57,10 +56,10 @@ void GameManager::run(){
 
 	bool exit_ = false;
 
-	loadAll();
-
 	gui_ = std::unique_ptr<Gui>(new Gui(this));
 	gui_->run();
+
+	loadAll();
 
 	sf::Clock clock;
 
@@ -174,6 +173,34 @@ void GameManager::loadGameFromFile(std::string gamefile){
 		}
 	}
 	fin.close();
+
+	//now add all objects to gui (after all properties are set)
+	for (auto& it : objects_){
+		addObjToGui(it.get());
+	}
+	for (auto& it : textures_){
+		addTexToGui(it.get());
+	}
+}
+
+void GameManager::updateAllEntitySprites(Object* object){
+	for (auto& it : entities_){
+		if (it->getType().getName() == object->getName()){
+			it->updateSprite();
+		}
+	}
+}
+
+void GameManager::objectSelected(std::string name){
+	selected_ = getObjectByName(name);
+}
+
+void GameManager::addObjToGui(Object* object){
+	gui_->objectAdded(object->getName());
+}
+
+void GameManager::addTexToGui(Texture* texture){
+	gui_->textureAdded(texture->getName());
 }
 
 void GameManager::addEntity(Entity* entity){
@@ -191,11 +218,7 @@ void GameManager::addTexture(Texture* texture){
 void GameManager::keyPressed(sf::Keyboard::Key key){
 	using namespace sf;
 	if (key == Keyboard::Q){
-		selected_++;
-		if (selected_ >= objects_.size()){
-			selected_ = 0;
-		}
-		gui_->objectSelected(objects_[selected_].get());
+		//gui_->objectSelected(objects_[selected_]->);
 	}
 	else if (key == Keyboard::S){
 		saveLevel("testgame.level");
@@ -207,14 +230,14 @@ void GameManager::keyPressed(sf::Keyboard::Key key){
 		loadLevelFromFile("testgame.level");
 	}
 	else if (key == Keyboard::O){
-		loadGameFromFile("testgame2.game");
+		//loadGameFromFile("testgame2.game");
 	}
 }
 
 void GameManager::mouseClicked(sf::Mouse::Button button, maths::Vector2 mousePosition){
 	using namespace sf;
-	if (button == Mouse::Left){
-		addEntity(new Entity(this, objects_[selected_].get(), mousePosition));
+	if (button == Mouse::Left && selected_ != NULL){
+		addEntity(new Entity(this, selected_, mousePosition));
 	}
 }
 
