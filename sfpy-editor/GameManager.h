@@ -50,7 +50,13 @@ public:
 
 	void objectSelected(std::string name);
 	void updateAllEntitySprites(Object* object);
+
+	void sfguiClicked();
 private:
+	void removeEntity(maths::Vector2 position);
+
+	bool pass_click_to_sfml;
+
 	void addObjToGui(Object* object);
 	void addTexToGui(Texture* texture);
 	void addSoundToGui(Sound* sound);

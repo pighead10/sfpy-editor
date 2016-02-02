@@ -1,6 +1,7 @@
 #include "PropertyWindow.h"
 #include "Gui.h"
 #include "MenuItem.h"
+#include "GameManager.h"
 
 PropertyWindow::PropertyWindow(){
 }
@@ -20,6 +21,7 @@ void PropertyWindow::construct(Gui* parent,GameManager* game_manager,std::string
 	game_manager_ = game_manager;
 	name_ = name;
 	window_ = Window::Create(Window::BACKGROUND | Window::CLOSE | Window::TITLEBAR | Window::RESIZE);
+	parent_->subscribeWindowClicked(window_);
 	apply_button_ = Button::Create("Apply");
 	delete_button_ = Button::Create("Delete");
 	createElements();

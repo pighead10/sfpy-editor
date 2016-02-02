@@ -15,7 +15,7 @@
 #include "TextDialogBox.h"
 
 Gui::Gui(GameManager* game_manager):game_manager_(game_manager),
-objcount_(0),texcount_(0),scriptcount_(0),soundcount_(0),save_name_(0){
+objcount_(0),texcount_(0),scriptcount_(0),soundcount_(0),save_name_(""){
 }
 
 Gui::~Gui(){
@@ -23,6 +23,10 @@ Gui::~Gui(){
 
 void Gui::update(int elapsed){
 	desktop.Update(elapsed);
+}
+
+void Gui::subscribeWindowClicked(sfg::Window::Ptr window){
+	window->GetSignal(sfg::Widget::OnMouseLeftPress).Connect(std::bind(&GameManager::sfguiClicked, game_manager_));
 }
 
 void Gui::handleEvent(sf::Event evt){
@@ -83,6 +87,7 @@ void Gui::itemSelected(std::string name, GUI_TYPE type){
 	PropertyWindow* window = NULL;
 	if (type == GUI_OBJECT){
 		window = new ObjectWindow(this, game_manager_, name, getMenuItem(name, type));
+		game_manager_->objectSelected(name);
 	}
 	else if (type == GUI_TEXTURE){
 		window = new TextureWindow(this, game_manager_, name, getMenuItem(name, type));
@@ -186,6 +191,7 @@ void Gui::fileMenuSelect(){
 		obj->setProperty("collidable", "True");
 		obj->setProperty("position", "Vector2(0,0)");
 		obj->setProperty("velocity", "Vector2(0,0)");
+
 		obj->setProperty("texture", "");
 		obj->setProperty("name", n);
 		game_manager_->addObject(obj);
@@ -216,7 +222,13 @@ void Gui::fileMenuSelect(){
 		scriptAdded(n);
 	}
 	else if (selected == 5){ //save
-
+		save();
+	}
+	else if (selected == 6){ //save as
+		saveAs();
+	}
+	else if (selected == 7){ //load
+		load();
 	}
 	file_->SelectItem(0);
 }
@@ -302,6 +314,16 @@ void Gui::deleteScript_no(std::string name){
 	//don't delete object...
 }
 
+void Gui::clearAll(){
+	window_list_.clear();
+	menu_list_.clear();
+	objcount_ = 0;
+	texcount_ = 0;
+	soundcount_ = 0;
+	scriptcount_ = 0;
+	save_name_ = "";
+}
+
 void Gui::save(){
 	if (save_name_ == ""){
 		saveAs();
@@ -313,12 +335,29 @@ void Gui::save(){
 }
 
 void Gui::saveAs(){
-	TextDialogBox* box = new TextDialogBox(this, "Save file as", "Enter file path and name for your game to be saved as. No file extension is necessary (e.g: 'examples/mygame')",
+	TextDialogBox* box = new TextDialogBox(this, "Save file as", "Enter file path and name for your game to be saved as. No file extension is necessary (e.g: 'examples/mygame'). Leave blank to cancel.",
 		std::bind(&Gui::saveFileSelected, this, std::placeholders::_1));
 }
 
 void Gui::saveFileSelected(std::string filename){
+	if (filename != ""){
+		save_name_ = filename;
+		save();
+	}
+}
 
+void Gui::load(){
+	TextDialogBox* box = new TextDialogBox(this, "Load game", "Enter file path and name for the game you want to load. No file extension is necessary (e.g: 'examples/mygame'). Leave blank to cancel.",
+		std::bind(&Gui::loadFileSelected, this, std::placeholders::_1));
+}
+
+void Gui::loadFileSelected(std::string filename){
+	if (filename != ""){
+		clearAll();
+		game_manager_->loadGameFromFile(filename + ".game");
+		game_manager_->loadLevelFromFile(filename + ".level");
+		save_name_ = filename;
+	}
 }
 
 void Gui::run(){
@@ -326,6 +365,8 @@ void Gui::run(){
 
 	auto window = Window::Create();
 	window->SetTitle("Object Browser");
+
+	subscribeWindowClicked(window);
 
 	selector_ = Notebook::Create();
 	obj_box_ = Box::Create(Box::Orientation::VERTICAL, 5.0f);
@@ -351,6 +392,7 @@ void Gui::run(){
 	file_->AppendItem("Add script");
 	file_->AppendItem("Save");
 	file_->AppendItem("Save as");
+	file_->AppendItem("Load");
 
 	file_->SelectItem(0);
 

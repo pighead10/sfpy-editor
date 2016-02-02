@@ -1,5 +1,6 @@
 #include "ConfirmationWindow.h"
 #include "Gui.h"
+#include "GameManager.h"
 
 ConfirmationWindow::ConfirmationWindow(Gui* parent,std::string title, std::string message, std::string arg,
 	std::function<void(std::string)> yesfunc, std::function<void(std::string)> nofunc) :nofunc_(nofunc), yesfunc_(yesfunc),
@@ -32,6 +33,8 @@ void ConfirmationWindow::initgui(std::string title,std::string message){
 	using namespace sfg;
 	window_ = Window::Create();
 	window_->SetTitle(title);
+
+	parent_->subscribeWindowClicked(window_);
 
 	auto layout = Box::Create(Box::Orientation::VERTICAL);
 	auto box1 = Box::Create(Box::Orientation::HORIZONTAL);

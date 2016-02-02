@@ -68,6 +68,10 @@ Script* GameManager::getScriptByName(std::string name){
 	return NULL;
 }
 
+void GameManager::sfguiClicked(){
+	pass_click_to_sfml = false;
+}
+
 void GameManager::run(){
 	sf::VideoMode vm(1024, 768);
 	sf::RenderWindow window;
@@ -76,6 +80,7 @@ void GameManager::run(){
 	window.resetGLStates();
 
 	bool exit_ = false;
+	
 
 	gui_ = std::unique_ptr<Gui>(new Gui(this));
 	gui_->run();
@@ -87,11 +92,12 @@ void GameManager::run(){
 	while (!exit_){
 		sf::Event evt;
 		while (window.pollEvent(evt)){
+			pass_click_to_sfml = true;
 			gui_->handleEvent(evt);
 			if (evt.type == sf::Event::Closed){
 				exit_ = true;
 			}
-			else if (evt.type == sf::Event::MouseButtonPressed){
+			else if (pass_click_to_sfml && evt.type == sf::Event::MouseButtonPressed){
 				mouseClicked(evt.mouseButton.button, maths::Vector2(evt.mouseButton.x, evt.mouseButton.y));
 			}
 			else if (evt.type == sf::Event::KeyPressed){
@@ -170,6 +176,8 @@ void GameManager::loadGameFromFile(std::string gamefile){
 
 	textures_.clear();
 	objects_.clear();
+	scripts_.clear();
+	sounds_.clear();
 
 	ifstream fin(gamefile);
 	string line;
@@ -360,10 +368,24 @@ void GameManager::keyPressed(sf::Keyboard::Key key){
 	}
 }
 
+void GameManager::removeEntity(maths::Vector2 position){
+	for (auto& it = entities_.begin(); it != entities_.end();){
+		if ((*it)->getSprite().getGlobalBounds().contains(position)){
+			it = entities_.erase(it);
+		}
+		else{
+			it++;
+		}
+	}
+}
+
 void GameManager::mouseClicked(sf::Mouse::Button button, maths::Vector2 mousePosition){
 	using namespace sf;
 	if (button == Mouse::Left && selected_ != NULL){
 		addEntity(new Entity(this, selected_, mousePosition));
+	}
+	else if (button == Mouse::Right){
+		removeEntity(mousePosition);
 	}
 }
 
