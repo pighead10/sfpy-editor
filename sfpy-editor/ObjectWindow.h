@@ -9,6 +9,7 @@ public:
 protected:
 	void applySettings();
 	void createElements();
+	void onDeletePressed();
 private:
 	sfg::Entry::Ptr nameentry_;
 	sfg::Entry::Ptr spriteentry_;

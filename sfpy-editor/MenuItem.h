@@ -7,6 +7,7 @@
 
 class MenuItem{
 public:
+	MenuItem(Gui* parent,std::string name,Gui::GUI_TYPE type);
 	virtual ~MenuItem();
 
 	void setActive(bool active);

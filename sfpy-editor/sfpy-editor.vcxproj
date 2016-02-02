@@ -70,31 +70,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConfirmationWindow.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MenuItem.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Gui.cpp" />
-    <ClCompile Include="ObjectItem.cpp" />
     <ClCompile Include="ObjectWindow.cpp" />
     <ClCompile Include="PropertyWindow.cpp" />
+    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="ScriptWindow.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="SoundWindow.cpp" />
+    <ClCompile Include="TextDialogBox.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TextureItem.cpp" />
     <ClCompile Include="TextureWindow.cpp" />
     <ClCompile Include="Vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConfirmationWindow.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="MenuItem.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="GameManager.h" />
-    <ClInclude Include="ObjectItem.h" />
     <ClInclude Include="ObjectWindow.h" />
     <ClInclude Include="PropertyWindow.h" />
+    <ClInclude Include="Script.h" />
+    <ClInclude Include="ScriptWindow.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="SoundWindow.h" />
+    <ClInclude Include="TextDialogBox.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="TextureItem.h" />
     <ClInclude Include="TextureWindow.h" />
     <ClInclude Include="Vector2.h" />
   </ItemGroup>

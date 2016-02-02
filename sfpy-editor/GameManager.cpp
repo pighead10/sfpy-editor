@@ -7,6 +7,8 @@
 #include "Texture.h"
 #include "Entity.h"
 #include "Gui.h"
+#include "Script.h"
+#include "Sound.h"
 
 
 //TODO global scripts!!
@@ -22,7 +24,7 @@ GameManager::~GameManager(){
 }
 
 void GameManager::loadAll(){
-	loadGameFromFile("testgame.game");
+	loadGameFromFile("testgame2.game");
 	//todo load level
 }
 
@@ -42,10 +44,29 @@ Object* GameManager::getObjectByName(std::string name){
 			return it.get();
 		}
 	}
-	std::cout << "ERROR: No object count with name: " << name << std::endl;
+	std::cout << "ERROR: No object found with name: " << name << std::endl;
 	return NULL;
 }
 
+Sound* GameManager::getSoundByName(std::string name){
+	for (auto& it : sounds_){
+		if (it->getName() == name){
+			return it.get();
+		}
+	}
+	std::cout << "ERROR: No sound found with name: " << name << std::endl;
+	return NULL;
+}
+
+Script* GameManager::getScriptByName(std::string name){
+	for (auto& it : scripts_){
+		if (it->getName() == name){
+			return it.get();
+		}
+	}
+	std::cout << "ERROR: No script found with name: " << name << std::endl;
+	return NULL;
+}
 
 void GameManager::run(){
 	sf::VideoMode vm(1024, 768);
@@ -88,6 +109,61 @@ void GameManager::run(){
 	window.close();
 }
 
+void GameManager::removeObject(std::string name){
+	for (auto& it = entities_.begin(); it != entities_.end();){
+		if ((*it)->getType().getName() == name){
+			it = entities_.erase(it);
+		}
+		else{
+			it++;
+		}
+	}
+	for (auto& it = objects_.begin(); it != objects_.end();){
+		if ((*it)->getName() == name){
+			it = objects_.erase(it);
+		}
+		else{
+			it++;
+		}
+	}
+}
+
+void GameManager::removeTexture(std::string name){
+	for (auto& it = textures_.begin(); it != textures_.end();){
+		if ((*it)->getName() == name){
+			textures_.erase(it);
+			break;
+		}
+		else{
+			it++;
+		}
+	}
+}
+
+void GameManager::removeScript(std::string name){
+	for (auto& it = scripts_.begin(); it != scripts_.end();){
+		if ((*it)->getName() == name){
+			scripts_.erase(it);
+			break;
+		}
+		else{
+			it++;
+		}
+	}
+}
+
+void GameManager::removeSound(std::string name){
+	for (auto& it = sounds_.begin(); it != sounds_.end();){
+		if ((*it)->getName() == name){
+			sounds_.erase(it);
+			break;
+		}
+		else{
+			it++;
+		}
+	}
+}
+
 void GameManager::loadGameFromFile(std::string gamefile){
 	//Read gamefile to store game properties (objects, sprites, etc)
 	using namespace std;
@@ -103,6 +179,8 @@ void GameManager::loadGameFromFile(std::string gamefile){
 
 	Object* current_obj = NULL;
 	Texture* current_tex = NULL;
+	Script* current_script = NULL;
+	Sound* current_sound = NULL;
 
 	while (getline(fin, line)){
 		if (line.length() > 0 && line[0] != '#'){ //ignore commented lines
@@ -121,6 +199,22 @@ void GameManager::loadGameFromFile(std::string gamefile){
 					}
 					else if (prop == "name"){
 						current_tex->setName(line);
+					}
+				}
+				else if (type == TYPE_SCRIPT){
+					if (prop == "filename"){
+						current_script->setFilename(line);
+					}
+					else if (prop == "name"){
+						current_script->setName(line);
+					}
+				}
+				else if (type == TYPE_SOUND){
+					if (prop == "filename"){
+						current_sound->setFilename(line);
+					}
+					else if (prop == "name"){
+						current_sound->setName(line);
 					}
 				}
 				prefix = PREFIX_NONE;
@@ -163,6 +257,16 @@ void GameManager::loadGameFromFile(std::string gamefile){
 								current_tex = new Texture();
 								addTexture(current_tex);
 							}
+							else if (word == "sound"){
+								type = TYPE_SOUND;
+								current_sound = new Sound();
+								addSound(current_sound);
+							}
+							else if (word == "script"){
+								type = TYPE_SCRIPT;
+								current_script = new Script();
+								addScript(current_script);
+							}
 						}
 						else if (prefix == PREFIX_PROP){
 							prop = word;
@@ -180,6 +284,12 @@ void GameManager::loadGameFromFile(std::string gamefile){
 	}
 	for (auto& it : textures_){
 		addTexToGui(it.get());
+	}
+	for (auto& it : scripts_){
+		addScriptToGui(it.get());
+	}
+	for (auto& it : sounds_){
+		addSoundToGui(it.get());
 	}
 }
 
@@ -203,6 +313,14 @@ void GameManager::addTexToGui(Texture* texture){
 	gui_->textureAdded(texture->getName());
 }
 
+void GameManager::addSoundToGui(Sound* sound){
+	gui_->soundAdded(sound->getName());
+}
+
+void GameManager::addScriptToGui(Script* script){
+	gui_->scriptAdded(script->getName());
+}
+
 void GameManager::addEntity(Entity* entity){
 	entities_.push_back(std::unique_ptr<Entity>(entity));
 }
@@ -215,19 +333,27 @@ void GameManager::addTexture(Texture* texture){
 	textures_.push_back(std::unique_ptr<Texture>(texture));
 }
 
+void GameManager::addSound(Sound* sound){
+	sounds_.push_back(std::unique_ptr<Sound>(sound));
+}
+
+void GameManager::addScript(Script* script){
+	scripts_.push_back(std::unique_ptr<Script>(script));
+}
+
 void GameManager::keyPressed(sf::Keyboard::Key key){
 	using namespace sf;
 	if (key == Keyboard::Q){
 		//gui_->objectSelected(objects_[selected_]->);
 	}
 	else if (key == Keyboard::S){
-		saveLevel("testgame.level");
+		//saveLevel("testgame.level");
 	}
 	else if (key == Keyboard::P){
-		saveGame("testgame2.game");
+		//saveGame("testgame2.game");
 	}
 	else if (key == Keyboard::L){
-		loadLevelFromFile("testgame.level");
+		//loadLevelFromFile("testgame.level");
 	}
 	else if (key == Keyboard::O){
 		//loadGameFromFile("testgame2.game");
@@ -336,6 +462,26 @@ void GameManager::saveGame(std::string filename){
 	
 	for (auto& it : textures_){
 		string s = "$type tex\n";
+		s += "$prop name\n";
+		s += it->getName() + "\n";
+		s += "$prop filename\n";
+		s += it->getFilename() + "\n";
+		s += "\n";
+		fout << s;
+	}
+
+	for (auto& it : scripts_){
+		string s = "$type script\n";
+		s += "$prop name\n";
+		s += it->getName() + "\n";
+		s += "$prop filename\n";
+		s += it->getFilename() + "\n";
+		s += "\n";
+		fout << s;
+	}
+
+	for (auto& it : sounds_){
+		string s = "$type sound\n";
 		s += "$prop name\n";
 		s += it->getName() + "\n";
 		s += "$prop filename\n";

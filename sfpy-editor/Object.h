@@ -12,7 +12,6 @@ public:
 	Object();
 	~Object();
 
-
 	void setProperty(std::string name, std::string value);
 	void setName(std::string name);
 

@@ -10,6 +10,7 @@ PropertyWindow::PropertyWindow(Gui* parent,GameManager* game_manager,std::string
 }
 
 PropertyWindow::~PropertyWindow(){
+	parent_->getDesktop()->Remove(window_);
 }
 
 void PropertyWindow::construct(Gui* parent,GameManager* game_manager,std::string name,MenuItem* menu_item){
@@ -20,6 +21,7 @@ void PropertyWindow::construct(Gui* parent,GameManager* game_manager,std::string
 	name_ = name;
 	window_ = Window::Create(Window::BACKGROUND | Window::CLOSE | Window::TITLEBAR | Window::RESIZE);
 	apply_button_ = Button::Create("Apply");
+	delete_button_ = Button::Create("Delete");
 	createElements();
 	parent_->getDesktop()->Add(window_);
 	subscribeEvents();
@@ -44,15 +46,11 @@ void PropertyWindow::makeActive(){
 }
 
 void PropertyWindow::onWindowClosed(){
-	using namespace sfg;
-	auto widget = Context::Get().GetActiveWidget();
-
-	while(widget->GetName() != "Window"){
-		widget = widget->GetParent();
-	}
-	parent_->getDesktop()->Remove(widget);
-
+	using namespace sfg;	
 	parent_->removeWindow(this);
+}
+
+void PropertyWindow::onDeletePressed(){
 }
 
 void PropertyWindow::applySettings(){
@@ -62,6 +60,7 @@ void PropertyWindow::applySettings(){
 void PropertyWindow::subscribeEvents(){
 	window_->GetSignal(sfg::Window::OnCloseButton).Connect(std::bind(&PropertyWindow::onWindowClosed, this));
 	apply_button_->GetSignal(sfg::Widget::OnLeftClick).Connect(std::bind(&PropertyWindow::applySettings, this));
+	delete_button_->GetSignal(sfg::Widget::OnLeftClick).Connect(std::bind(&PropertyWindow::onDeletePressed, this));
 }
 
 void PropertyWindow::createElements(){

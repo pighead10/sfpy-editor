@@ -1,45 +1,44 @@
-#include "TextureWindow.h"
-#include "Texture.h"
+#include "ScriptWindow.h"
+#include "Script.h"
 #include "GameManager.h"
 #include "Gui.h"
 
-TextureWindow::TextureWindow(Gui* parent, GameManager* game_manager, std::string name, MenuItem* menu_item){
+ScriptWindow::ScriptWindow(Gui* parent, GameManager* game_manager, std::string name, MenuItem* menu_item){
 	construct(parent, game_manager, name, menu_item);
 }
 
-TextureWindow::~TextureWindow(){
+ScriptWindow::~ScriptWindow(){
 }
 
-void TextureWindow::applySettings(){
+void ScriptWindow::applySettings(){
 	std::string name = nameentry_->GetText();
-	Texture* compare = game_manager_->getTextureByName(name);
+	Script* compare = game_manager_->getScriptByName(name);
 	if (compare != NULL && compare != compare){
-		std::cout << "ERROR: Name already in use in texture " + name << std::endl;
+		std::cout << "ERROR: Name already in use in Script " + name << std::endl;
 	}
 	else{
-		texture_->setName(name);
+		script_->setName(name);
 		setName(name);
-		window_->SetTitle("Texture: " + name_);
+		window_->SetTitle("Script: " + name_);
 		std::string filename = fileentry_->GetText();
-		texture_->setFilename(filename);
+		script_->setFilename(filename);
 	}
 }
 
-void TextureWindow::onDeletePressed(){
-	parent_->requestDeleteTexture(getName());
+void ScriptWindow::onDeletePressed(){
+	parent_->requestDeleteScript(getName());
 }
 
-void TextureWindow::createElements(){
+void ScriptWindow::createElements(){
 	using namespace sfg;
-	type_ = Gui::GUI_TEXTURE;
-	texture_ = game_manager_->getTextureByName(name_);
-	window_->SetTitle("Texture: " + name_);
+	type_ = Gui::GUI_SCRIPT;
+	script_ = game_manager_->getScriptByName(name_);
+	window_->SetTitle("Script: " + name_);
 
 	auto namebox = Box::Create(Box::Orientation::HORIZONTAL, 5);
 	auto filebox = Box::Create(Box::Orientation::HORIZONTAL, 5);
 	auto donebox = Box::Create(Box::Orientation::HORIZONTAL, 5);
 	auto layoutbox = Box::Create(Box::Orientation::VERTICAL, 5);
-
 
 	nameentry_ = Entry::Create();
 	nameentry_->SetRequisition(maths::Vector2(200, 0));
@@ -51,8 +50,8 @@ void TextureWindow::createElements(){
 
 	fileentry_ = Entry::Create();
 	fileentry_->SetRequisition(maths::Vector2(200, 0));
-	fileentry_->SetText(texture_->getFilename());
-	
+	fileentry_->SetText(script_->getFilename());
+
 	auto filelabel = Label::Create("File name");
 	filebox->Pack(filelabel);
 	filebox->Pack(fileentry_);
@@ -63,6 +62,6 @@ void TextureWindow::createElements(){
 	layoutbox->Pack(namebox);
 	layoutbox->Pack(filebox);
 	layoutbox->Pack(donebox);
-	
+
 	window_->Add(layoutbox);
 }

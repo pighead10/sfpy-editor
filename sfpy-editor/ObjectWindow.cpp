@@ -40,6 +40,10 @@ void ObjectWindow::applySettings(){ //TODO test all properties of level editor c
 	}
 }
 
+void ObjectWindow::onDeletePressed(){
+	parent_->requestDeleteObject(getName());
+}
+
 void ObjectWindow::createElements(){
 	using namespace sfg;
 	type_ = Gui::GUI_OBJECT;
@@ -80,8 +84,8 @@ void ObjectWindow::createElements(){
 	boxbox->Pack(visbutton_);
 	boxbox->Pack(colbutton_);
 
-	apply_button_ = Button::Create("Apply");
 	donebox->Pack(apply_button_);
+	donebox->Pack(delete_button_);
 
 	layoutbox->Pack(namebox);
 	layoutbox->Pack(spritebox);

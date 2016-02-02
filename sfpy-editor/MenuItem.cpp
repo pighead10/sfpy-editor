@@ -1,8 +1,12 @@
 #include "MenuItem.h"
 #include "Gui.h"
 
-MenuItem::~MenuItem(){
+MenuItem::MenuItem(Gui* parent,std::string name,Gui::GUI_TYPE type){
+	init(parent, name,type);
+}
 
+MenuItem::~MenuItem(){
+	button_->GetParent()->Remove(button_);
 }
 
 void MenuItem::setActive(bool active){
@@ -15,7 +19,7 @@ void MenuItem::setActive(bool active){
 }
 
 void MenuItem::selected(){
-	//...
+	parent_->itemSelected(getName(), getType());
 }
 
 void MenuItem::setName(std::string name){

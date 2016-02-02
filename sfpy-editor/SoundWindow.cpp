@@ -1,45 +1,44 @@
-#include "TextureWindow.h"
-#include "Texture.h"
+#include "SoundWindow.h"
+#include "Sound.h"
 #include "GameManager.h"
 #include "Gui.h"
 
-TextureWindow::TextureWindow(Gui* parent, GameManager* game_manager, std::string name, MenuItem* menu_item){
+SoundWindow::SoundWindow(Gui* parent, GameManager* game_manager, std::string name, MenuItem* menu_item){
 	construct(parent, game_manager, name, menu_item);
 }
 
-TextureWindow::~TextureWindow(){
+SoundWindow::~SoundWindow(){
 }
 
-void TextureWindow::applySettings(){
+void SoundWindow::applySettings(){
 	std::string name = nameentry_->GetText();
-	Texture* compare = game_manager_->getTextureByName(name);
+	Sound* compare = game_manager_->getSoundByName(name);
 	if (compare != NULL && compare != compare){
-		std::cout << "ERROR: Name already in use in texture " + name << std::endl;
+		std::cout << "ERROR: Name already in use in Sound " + name << std::endl;
 	}
 	else{
-		texture_->setName(name);
+		sound_->setName(name);
 		setName(name);
-		window_->SetTitle("Texture: " + name_);
+		window_->SetTitle("Sound: " + name_);
 		std::string filename = fileentry_->GetText();
-		texture_->setFilename(filename);
+		sound_->setFilename(filename);
 	}
 }
 
-void TextureWindow::onDeletePressed(){
-	parent_->requestDeleteTexture(getName());
+void SoundWindow::onDeletePressed(){
+	parent_->requestDeleteSound(getName());
 }
 
-void TextureWindow::createElements(){
+void SoundWindow::createElements(){
 	using namespace sfg;
-	type_ = Gui::GUI_TEXTURE;
-	texture_ = game_manager_->getTextureByName(name_);
-	window_->SetTitle("Texture: " + name_);
+	type_ = Gui::GUI_SOUND;
+	sound_ = game_manager_->getSoundByName(name_);
+	window_->SetTitle("Sound: " + name_);
 
 	auto namebox = Box::Create(Box::Orientation::HORIZONTAL, 5);
 	auto filebox = Box::Create(Box::Orientation::HORIZONTAL, 5);
 	auto donebox = Box::Create(Box::Orientation::HORIZONTAL, 5);
 	auto layoutbox = Box::Create(Box::Orientation::VERTICAL, 5);
-
 
 	nameentry_ = Entry::Create();
 	nameentry_->SetRequisition(maths::Vector2(200, 0));
@@ -51,8 +50,8 @@ void TextureWindow::createElements(){
 
 	fileentry_ = Entry::Create();
 	fileentry_->SetRequisition(maths::Vector2(200, 0));
-	fileentry_->SetText(texture_->getFilename());
-	
+	fileentry_->SetText(sound_->getFilename());
+
 	auto filelabel = Label::Create("File name");
 	filebox->Pack(filelabel);
 	filebox->Pack(fileentry_);
@@ -63,6 +62,6 @@ void TextureWindow::createElements(){
 	layoutbox->Pack(namebox);
 	layoutbox->Pack(filebox);
 	layoutbox->Pack(donebox);
-	
+
 	window_->Add(layoutbox);
 }
