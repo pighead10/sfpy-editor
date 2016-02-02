@@ -14,6 +14,8 @@
 #include "ScriptWindow.h"
 #include "TextDialogBox.h"
 
+//TODO NAME VALIDATION
+
 Gui::Gui(GameManager* game_manager):game_manager_(game_manager),
 objcount_(0),texcount_(0),scriptcount_(0),soundcount_(0),save_name_(""){
 }
