@@ -45,4 +45,5 @@ void MenuItem::init(Gui* parent, std::string name,Gui::GUI_TYPE type){
 	name_ = name;
 	button_ = sfg::Button::Create(name);
 	button_->GetSignal(sfg::Widget::OnLeftClick).Connect(std::bind(&MenuItem::selected, this));
+	parent_->subscribeWidgetClicked(button_);
 }

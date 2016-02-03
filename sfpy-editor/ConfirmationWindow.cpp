@@ -34,7 +34,7 @@ void ConfirmationWindow::initgui(std::string title,std::string message){
 	window_ = Window::Create();
 	window_->SetTitle(title);
 
-	parent_->subscribeWindowClicked(window_);
+	parent_->subscribeWidgetClicked(window_);
 
 	auto layout = Box::Create(Box::Orientation::VERTICAL);
 	auto box1 = Box::Create(Box::Orientation::HORIZONTAL);
@@ -54,6 +54,9 @@ void ConfirmationWindow::initgui(std::string title,std::string message){
 
 	window_->Add(layout);
 
+	
+	parent_->subscribeWidgetClicked(yesbutton);
+	parent_->subscribeWidgetClicked(nobutton);
 	yesbutton->GetSignal(Widget::OnLeftClick).Connect(std::bind(&ConfirmationWindow::yesSelected, this));
 	nobutton->GetSignal(Widget::OnLeftClick).Connect(std::bind(&ConfirmationWindow::noSelected, this));
 

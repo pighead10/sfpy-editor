@@ -26,7 +26,7 @@ void TextDialogBox::initgui(std::string title,std::string text){
 	window_ = Window::Create();
 	window_->SetTitle(title);
 
-	parent_->subscribeWindowClicked(window_);
+	parent_->subscribeWidgetClicked(window_);
 
 	auto box = Box::Create(Box::Orientation::VERTICAL, 5.0f);
 	entry_ = Entry::Create();
@@ -41,6 +41,7 @@ void TextDialogBox::initgui(std::string title,std::string text){
 	window_->Add(box);
 
 	applybutton->GetSignal(Widget::OnLeftClick).Connect(std::bind(&TextDialogBox::applyPressed,this));
+	parent_->subscribeWidgetClicked(applybutton);
 	parent_->getDesktop()->Add(window_);
 	
 }

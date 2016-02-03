@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "GameManager.h"
 #include "Gui.h"
+#include "NotificationWindow.h"
 
 ObjectWindow::ObjectWindow(Gui* parent, GameManager* game_manager, std::string name,MenuItem* menu_item){
 	construct(parent, game_manager, name,menu_item);
@@ -16,27 +17,38 @@ void ObjectWindow::applySettings(){ //TODO test all properties of level editor c
 	Object* compare = game_manager_->getObjectByName(name);
 	if (compare != NULL && compare != object_){
 		std::cout << "ERROR: Name already in use in game " + name << std::endl;
+		NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "The name you entered is already in use.");
 	}
 	else{
-		object_->setName(name);
-		setName(name);
-		window_->SetTitle("Object: " + name_);
 		std::string visible = (visbutton_->IsActive() ? "True" : "False");
 		std::string collidable = (colbutton_->IsActive() ? "True" : "False");
 		std::string texture = spriteentry_->GetText();
-
-		if (game_manager_->getTextureByName(texture) == NULL){
-			std::cout << "ERROR: Attempted to set texture of object " + name + " to texture " + texture + " which doesn't exist." << std::endl;
+		//check if properties valid first
+		if (!isNameValid(name) || !isNameValid(texture)){
+			NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "Make sure name and texture are not blank, start with a letter, and contain only alphanumeric characters, -, and _.");
+		}
+		else if (game_manager_->getTextureByName(texture) == NULL){
+			NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "The texture you entered does not exist.");
 		}
 		else{
-			object_->setProperty("texture", texture);
-			//Update all sprites of instances of objects that have already been placed
-			game_manager_->updateAllEntitySprites(object_);
-		}
+			object_->setName(name);
+			setName(name);
+			window_->SetTitle("Object: " + name_);
 
-		object_->setProperty("visible", visible);
-		object_->setProperty("collidable", collidable);
-		object_->setProperty("name", name);
+
+			if (game_manager_->getTextureByName(texture) == NULL){
+				std::cout << "ERROR: Attempted to set texture of object " + name + " to texture " + texture + " which doesn't exist." << std::endl;
+			}
+			else{
+				object_->setProperty("texture", texture);
+				//Update all sprites of instances of objects that have already been placed
+				game_manager_->updateAllEntitySprites(object_);
+			}
+
+			object_->setProperty("visible", visible);
+			object_->setProperty("collidable", collidable);
+			object_->setProperty("name", name);
+		}
 	}
 }
 

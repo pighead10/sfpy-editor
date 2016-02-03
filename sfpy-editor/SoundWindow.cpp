@@ -2,6 +2,7 @@
 #include "Sound.h"
 #include "GameManager.h"
 #include "Gui.h"
+#include "NotificationWindow.h"
 
 SoundWindow::SoundWindow(Gui* parent, GameManager* game_manager, std::string name, MenuItem* menu_item){
 	construct(parent, game_manager, name, menu_item);
@@ -15,13 +16,22 @@ void SoundWindow::applySettings(){
 	Sound* compare = game_manager_->getSoundByName(name);
 	if (compare != NULL && compare != compare){
 		std::cout << "ERROR: Name already in use in Sound " + name << std::endl;
+		NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "The name you entered is already in use.");
 	}
 	else{
-		sound_->setName(name);
-		setName(name);
-		window_->SetTitle("Sound: " + name_);
 		std::string filename = fileentry_->GetText();
-		sound_->setFilename(filename);
+		if (!isNameValid(name)){
+			NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "Invalid name. Make sure name starts with a letter and contains only alphanumeric characters, -, and _.");
+		}
+		else if (!isFilenameValid(filename, ".wav")){
+			NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "Invalid file name. Ensure it starts with a letter, contains only alphanumeric characters, - and _, and ends in .wav");
+		}
+		else{
+			sound_->setName(name);
+			setName(name);
+			window_->SetTitle("Sound: " + name_);
+			sound_->setFilename(filename);
+		}
 	}
 }
 

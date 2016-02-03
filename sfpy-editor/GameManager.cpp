@@ -9,6 +9,7 @@
 #include "Gui.h"
 #include "Script.h"
 #include "Sound.h"
+#include "NotificationWindow.h"
 
 
 //TODO global scripts!!
@@ -462,6 +463,10 @@ void GameManager::saveLevel(std::string filename){
 	fout.close();
 }
 
+void GameManager::setGameName(std::string name){
+	game_name_ = name;
+}
+
 void GameManager::saveGame(std::string filename){
 	using namespace std;
 	ofstream fout(filename);
@@ -471,45 +476,79 @@ void GameManager::saveGame(std::string filename){
 	fout << game_str;
 
 	for (auto& it : objects_){
-		string s = "$type obj\n";
-		s += "$name\n";
-		s += it->getName() + "\n";
+		//check for blank properties
+		bool blank = false;
 		for (auto& prop : it->getProperties()){
-			s += "$prop " + prop.first + "\n";
-			s += prop.second + "\n";
+			if (prop.second == ""){
+				std::string message = "A property '" + prop.first + "' was left blank in object " + it->getName() + ". This object was not saved.";
+				std::string title = "Warning: Object not saved";
+				NotificationWindow* note = new NotificationWindow(gui_.get(), title,message);
+				blank = true;
+				break;
+			}
 		}
-		s += "\n";
-		fout << s;
+
+		if (!blank){
+			string s = "$type obj\n";
+			s += "$name\n";
+			s += it->getName() + "\n";
+			for (auto& prop : it->getProperties()){
+				s += "$prop " + prop.first + "\n";
+				if (prop.first == "name" || prop.first == "texture"){ //put string properties with speech marks surrounding them
+					s += "'" + prop.second + "'\n";
+				}
+				else{
+					s += prop.second + "\n";
+				}
+			}
+			s += "\n";
+			fout << s;
+		}
 	}
 	
 	for (auto& it : textures_){
-		string s = "$type tex\n";
-		s += "$prop name\n";
-		s += it->getName() + "\n";
-		s += "$prop filename\n";
-		s += it->getFilename() + "\n";
-		s += "\n";
-		fout << s;
+		if (it->getFilename() == ""){
+			NotificationWindow* note = new NotificationWindow(gui_.get(), "Warning: Texture not saved", "The file name in texture " + it->getName() + " was left blank. This texture was not saved.");
+		}
+		else{
+			string s = "$type tex\n";
+			s += "$prop name\n";
+			s += it->getName() + "\n";
+			s += "$prop filename\n";
+			s += it->getFilename() + "\n";
+			s += "\n";
+			fout << s;
+		}
 	}
 
 	for (auto& it : scripts_){
-		string s = "$type script\n";
-		s += "$prop name\n";
-		s += it->getName() + "\n";
-		s += "$prop filename\n";
-		s += it->getFilename() + "\n";
-		s += "\n";
-		fout << s;
+		if (it->getFilename() == ""){
+			NotificationWindow* note = new NotificationWindow(gui_.get(), "Warning: Script not saved", "The file name in script " + it->getName() + " was left blank. This script was not saved.");
+		}
+		else{
+			string s = "$type script\n";
+			s += "$prop name\n";
+			s += it->getName() + "\n";
+			s += "$prop filename\n";
+			s += it->getFilename() + "\n";
+			s += "\n";
+			fout << s;
+		}
 	}
 
 	for (auto& it : sounds_){
-		string s = "$type sound\n";
-		s += "$prop name\n";
-		s += it->getName() + "\n";
-		s += "$prop filename\n";
-		s += it->getFilename() + "\n";
-		s += "\n";
-		fout << s;
+		if (it->getFilename() == ""){
+			NotificationWindow* note = new NotificationWindow(gui_.get(), "Warning: Sound not saved", "The file name in sound " + it->getName() + " was left blank. This sound was not saved.");
+		}
+		else{
+			string s = "$type sound\n";
+			s += "$prop name\n";
+			s += it->getName() + "\n";
+			s += "$prop filename\n";
+			s += it->getFilename() + "\n";
+			s += "\n";
+			fout << s;
+		}
 	}
 	fout.close();
 }

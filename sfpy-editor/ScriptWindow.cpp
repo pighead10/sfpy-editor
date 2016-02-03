@@ -2,6 +2,7 @@
 #include "Script.h"
 #include "GameManager.h"
 #include "Gui.h"
+#include "NotificationWindow.h"
 
 ScriptWindow::ScriptWindow(Gui* parent, GameManager* game_manager, std::string name, MenuItem* menu_item){
 	construct(parent, game_manager, name, menu_item);
@@ -15,13 +16,22 @@ void ScriptWindow::applySettings(){
 	Script* compare = game_manager_->getScriptByName(name);
 	if (compare != NULL && compare != compare){
 		std::cout << "ERROR: Name already in use in Script " + name << std::endl;
+		NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "The name you entered is already in use.");
 	}
 	else{
-		script_->setName(name);
-		setName(name);
-		window_->SetTitle("Script: " + name_);
 		std::string filename = fileentry_->GetText();
-		script_->setFilename(filename);
+		if (!isNameValid(name)){
+			NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "Invalid name. Make sure name starts with a letter and contains only alphanumeric characters, -, and _.");
+		}
+		else if (!isFilenameValid(filename, ".py")){
+			NotificationWindow* note = new NotificationWindow(parent_, "Could not apply settings", "Invalid file name. Ensure it starts with a letter, contains only alphanumeric characters, - and _, and ends in .py.");
+		}
+		else{
+			script_->setName(name);
+			setName(name);
+			window_->SetTitle("Script: " + name_);
+			script_->setFilename(filename);
+		}	
 	}
 }
 

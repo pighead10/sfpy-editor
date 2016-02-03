@@ -51,6 +51,8 @@ public:
 	void objectSelected(std::string name);
 	void updateAllEntitySprites(Object* object);
 
+	void setGameName(std::string name);
+
 	void sfguiClicked();
 private:
 	void removeEntity(maths::Vector2 position);

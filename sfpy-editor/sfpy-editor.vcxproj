@@ -75,6 +75,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MenuItem.cpp" />
+    <ClCompile Include="NotificationWindow.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="ObjectWindow.cpp" />
@@ -93,6 +94,7 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="MenuItem.h" />
+    <ClInclude Include="NotificationWindow.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="ObjectWindow.h" />

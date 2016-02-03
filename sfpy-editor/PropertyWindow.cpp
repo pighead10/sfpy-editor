@@ -21,7 +21,7 @@ void PropertyWindow::construct(Gui* parent,GameManager* game_manager,std::string
 	game_manager_ = game_manager;
 	name_ = name;
 	window_ = Window::Create(Window::BACKGROUND | Window::CLOSE | Window::TITLEBAR | Window::RESIZE);
-	parent_->subscribeWindowClicked(window_);
+	parent_->subscribeWidgetClicked(window_);
 	apply_button_ = Button::Create("Apply");
 	delete_button_ = Button::Create("Delete");
 	createElements();
@@ -35,6 +35,43 @@ Gui::GUI_TYPE PropertyWindow::getType() const{
 
 std::string PropertyWindow::getName() const{
 	return name_;
+}
+
+bool PropertyWindow::isNameValid(std::string name) const{
+	bool valid = true;
+	if (name == ""){
+		valid = false;
+	}
+	else if (!isalnum(name[0])){
+		valid = false;
+	}
+	else{
+		for (auto& it : name){
+			if (!isalnum(it) && it != '_' && it != '-'){
+				valid = false;
+				break;
+			}
+		}
+	}
+	return valid;
+}
+
+bool PropertyWindow::isFilenameValid(std::string name, std::string extension) const{
+	bool valid = true;
+	int disp = name.length() - extension.length();
+	if (disp <= 0){
+		valid = false;
+	}
+	else{
+		std::string noext = name.substr(0, disp);
+		valid = isNameValid(noext);
+		if (valid){
+			if (name.substr(disp, extension.length()) != extension){
+				valid = false;
+			}
+		}
+	}
+	return valid;
 }
 
 void PropertyWindow::setName(std::string name){
@@ -63,6 +100,9 @@ void PropertyWindow::subscribeEvents(){
 	window_->GetSignal(sfg::Window::OnCloseButton).Connect(std::bind(&PropertyWindow::onWindowClosed, this));
 	apply_button_->GetSignal(sfg::Widget::OnLeftClick).Connect(std::bind(&PropertyWindow::applySettings, this));
 	delete_button_->GetSignal(sfg::Widget::OnLeftClick).Connect(std::bind(&PropertyWindow::onDeletePressed, this));
+
+	parent_->subscribeWidgetClicked(apply_button_);
+	parent_->subscribeWidgetClicked(delete_button_);;
 }
 
 void PropertyWindow::createElements(){

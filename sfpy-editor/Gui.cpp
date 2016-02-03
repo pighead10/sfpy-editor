@@ -13,8 +13,7 @@
 #include "Script.h"
 #include "ScriptWindow.h"
 #include "TextDialogBox.h"
-
-//TODO NAME VALIDATION
+#include "NotificationWindow.h"
 
 Gui::Gui(GameManager* game_manager):game_manager_(game_manager),
 objcount_(0),texcount_(0),scriptcount_(0),soundcount_(0),save_name_(""){
@@ -27,8 +26,8 @@ void Gui::update(int elapsed){
 	desktop.Update(elapsed);
 }
 
-void Gui::subscribeWindowClicked(sfg::Window::Ptr window){
-	window->GetSignal(sfg::Widget::OnMouseLeftPress).Connect(std::bind(&GameManager::sfguiClicked, game_manager_));
+void Gui::subscribeWidgetClicked(sfg::Widget::Ptr widget){
+	widget->GetSignal(sfg::Widget::OnMouseLeftPress).Connect(std::bind(&GameManager::sfguiClicked, game_manager_));
 }
 
 void Gui::handleEvent(sf::Event evt){
@@ -232,6 +231,9 @@ void Gui::fileMenuSelect(){
 	else if (selected == 7){ //load
 		load();
 	}
+	else if (selected == 8){ //play game
+		playGame();
+	}
 	file_->SelectItem(0);
 }
 
@@ -326,11 +328,31 @@ void Gui::clearAll(){
 	save_name_ = "";
 }
 
+bool Gui::isNameValid(std::string name) const{
+	bool valid = true;
+	if (name == ""){
+		valid = false;
+	}
+	else if (!isalnum(name[0])){
+		valid = false;
+	}
+	else{
+		for (auto& it : name){
+			if (!isalnum(it) && it != '_' && it != '-'){
+				valid = false;
+				break;
+			}
+		}
+	}
+	return valid;
+}
+
 void Gui::save(){
 	if (save_name_ == ""){
 		saveAs();
 	}
 	else{
+		game_manager_->setGameName(save_name_);
 		game_manager_->saveLevel(save_name_ + ".level");
 		game_manager_->saveGame(save_name_ + ".game");
 	}
@@ -343,8 +365,13 @@ void Gui::saveAs(){
 
 void Gui::saveFileSelected(std::string filename){
 	if (filename != ""){
-		save_name_ = filename;
-		save();
+		if (!isNameValid(filename)){
+			NotificationWindow* note = new NotificationWindow(this, "Invalid name", "Invalid name. Make sure it starts with a letter and contains only alphanumeric characters, -, or _.");
+		}
+		else{
+			save_name_ = filename;
+			save();
+		}
 	}
 }
 
@@ -362,13 +389,18 @@ void Gui::loadFileSelected(std::string filename){
 	}
 }
 
+void Gui::playGame(){
+	std::string command = "sfpy-gmk.exe " + save_name_;
+	system(command.c_str());
+}
+
 void Gui::run(){
 	using namespace sfg;
 
 	auto window = Window::Create();
 	window->SetTitle("Object Browser");
 
-	subscribeWindowClicked(window);
+	subscribeWidgetClicked(window);
 
 	selector_ = Notebook::Create();
 	obj_box_ = Box::Create(Box::Orientation::VERTICAL, 5.0f);
@@ -395,10 +427,13 @@ void Gui::run(){
 	file_->AppendItem("Save");
 	file_->AppendItem("Save as");
 	file_->AppendItem("Load");
+	file_->AppendItem("Play game");
 
 	file_->SelectItem(0);
 
 	file_->GetSignal(ComboBox::OnSelect).Connect(std::bind(&Gui::fileMenuSelect, this));
+	file_->GetSignal(ComboBox::OnSelect).Connect(std::bind(&GameManager::sfguiClicked, game_manager_));
+	subscribeWidgetClicked(file_);
 
 	menubox->Pack(file_);
 	desktop.Add(menubox);
