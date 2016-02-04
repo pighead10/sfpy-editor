@@ -8,12 +8,14 @@ TextDialogBox::TextDialogBox(Gui* parent, std::string title, std::string text, s
 
 TextDialogBox::~TextDialogBox(){
 	using namespace sfg;
-	auto widget = Context::Get().GetActiveWidget();
+	/*auto widget = Context::Get().GetActiveWidget();
 
 	while (widget->GetName() != "Window"){
 		widget = widget->GetParent();
 	}
-	parent_->getDesktop()->Remove(widget);
+	parent_->getDesktop()->Remove(widget);*/
+
+	parent_->getDesktop()->Remove(window_);
 }
 
 void TextDialogBox::applyPressed(){

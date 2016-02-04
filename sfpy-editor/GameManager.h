@@ -54,6 +54,8 @@ public:
 	void setGameName(std::string name);
 
 	void sfguiClicked();
+
+	sf::RenderWindow* getWindow();
 private:
 	void removeEntity(maths::Vector2 position);
 
@@ -99,4 +101,5 @@ private:
 	std::unique_ptr<Gui> gui_;
 
 	Object* selected_;
+	sf::RenderWindow window_;
 };

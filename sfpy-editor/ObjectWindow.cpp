@@ -22,6 +22,7 @@ void ObjectWindow::applySettings(){ //TODO test all properties of level editor c
 	else{
 		std::string visible = (visbutton_->IsActive() ? "True" : "False");
 		std::string collidable = (colbutton_->IsActive() ? "True" : "False");
+		std::string behind = (behindbutton_->IsActive() ? "True" : "False");
 		std::string texture = spriteentry_->GetText();
 		//check if properties valid first
 		if (!isNameValid(name) || !isNameValid(texture)){
@@ -47,6 +48,7 @@ void ObjectWindow::applySettings(){ //TODO test all properties of level editor c
 
 			object_->setProperty("visible", visible);
 			object_->setProperty("collidable", collidable);
+			object_->setProperty("render_behind", behind);
 			object_->setProperty("name", name);
 		}
 	}
@@ -92,9 +94,18 @@ void ObjectWindow::createElements(){
 	if (object_->getProperty("collidable") == "True"){
 		colbutton_->SetActive(true);
 	}
+	behindbutton_ = CheckButton::Create("Render behind");
+	if (object_->getProperty("render_behind") == "True"){
+		behindbutton_->SetActive(true);
+	}
+
+	parent_->subscribeWidgetClicked(visbutton_);
+	parent_->subscribeWidgetClicked(colbutton_);
+	parent_->subscribeWidgetClicked(behindbutton_);
 
 	boxbox->Pack(visbutton_);
 	boxbox->Pack(colbutton_);
+	boxbox->Pack(behindbutton_);
 
 	donebox->Pack(apply_button_);
 	donebox->Pack(delete_button_);

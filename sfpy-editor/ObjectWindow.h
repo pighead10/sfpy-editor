@@ -15,6 +15,7 @@ private:
 	sfg::Entry::Ptr spriteentry_;
 	sfg::CheckButton::Ptr visbutton_;
 	sfg::CheckButton::Ptr colbutton_;
+	sfg::CheckButton::Ptr behindbutton_;
 
 	Object* object_;
 };

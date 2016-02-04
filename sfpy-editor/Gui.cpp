@@ -81,6 +81,9 @@ void Gui::itemSelected(std::string name, GUI_TYPE type){
 	for (auto& it : window_list_){
 		if (it->getType() == type && it->getName() == name){
 			it->makeActive();
+			if (type == GUI_OBJECT){
+				game_manager_->objectSelected(name);
+			}
 			return;
 		}
 	}
@@ -380,12 +383,18 @@ void Gui::load(){
 		std::bind(&Gui::loadFileSelected, this, std::placeholders::_1));
 }
 
-void Gui::loadFileSelected(std::string filename){
+void Gui::loadFileSelected(
+	std::string filename){
 	if (filename != ""){
-		clearAll();
-		game_manager_->loadGameFromFile(filename + ".game");
-		game_manager_->loadLevelFromFile(filename + ".level");
-		save_name_ = filename;
+		if (!isNameValid(filename)){
+			NotificationWindow* note = new NotificationWindow(this, "Invalid name", "Invalid name. Make sure it starts with a letter and contains only alphanumeric characters, -, or _.");
+		}
+		else{
+			clearAll();
+			game_manager_->loadGameFromFile(filename + ".game");
+			game_manager_->loadLevelFromFile(filename + ".level");
+			save_name_ = filename;
+		}
 	}
 }
 

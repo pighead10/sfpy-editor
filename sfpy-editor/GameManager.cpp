@@ -25,7 +25,7 @@ GameManager::~GameManager(){
 }
 
 void GameManager::loadAll(){
-	loadGameFromFile("testgame2.game");
+	//loadGameFromFile("testgame2.game");
 	//todo load level
 }
 
@@ -73,12 +73,16 @@ void GameManager::sfguiClicked(){
 	pass_click_to_sfml = false;
 }
 
+sf::RenderWindow* GameManager::getWindow(){
+	return &window_;
+}
+
 void GameManager::run(){
 	sf::VideoMode vm(1024, 768);
-	sf::RenderWindow window;
-	window.create(vm, game_name_);
+	//sf::RenderWindow window;
+	window_.create(vm, game_name_);
 
-	window.resetGLStates();
+	window_.resetGLStates();
 
 	bool exit_ = false;
 	
@@ -92,7 +96,7 @@ void GameManager::run(){
 
 	while (!exit_){
 		sf::Event evt;
-		while (window.pollEvent(evt)){
+		while (window_.pollEvent(evt)){
 			pass_click_to_sfml = true;
 			gui_->handleEvent(evt);
 			if (evt.type == sf::Event::Closed){
@@ -107,13 +111,13 @@ void GameManager::run(){
 		}
 		gui_->update(clock.restart().asSeconds());
 
-		window.clear(sf::Color::White);
-		render(&window);
-		gui_->display(&window);
-		window.display();
+		window_.clear(sf::Color::White);
+		render(&window_);
+		gui_->display(&window_);
+		window_.display();
 	}
 
-	window.close();
+	window_.close();
 }
 
 void GameManager::removeObject(std::string name){
