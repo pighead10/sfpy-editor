@@ -11,11 +11,6 @@
 #include "Sound.h"
 #include "NotificationWindow.h"
 
-
-//TODO global scripts!!
-//TODO error messages
-//TODO backup files
-
 GameManager::GameManager(){
 	selected_ = NULL;
 }
@@ -25,8 +20,7 @@ GameManager::~GameManager(){
 }
 
 void GameManager::loadAll(){
-	//loadGameFromFile("testgame2.game");
-	//todo load level
+	//...
 }
 
 Texture* GameManager::getTextureByName(std::string name){
@@ -70,6 +64,9 @@ Script* GameManager::getScriptByName(std::string name){
 }
 
 void GameManager::sfguiClicked(){
+	//Called whenever any part of GUI is clicked.
+	//Setting this variable to false instructs the program not to treat the most recent mouse click event as the game window being clicked.
+	//This is to prevent entities being placed whenever a user clicks on the GUI.
 	pass_click_to_sfml = false;
 }
 
@@ -78,8 +75,9 @@ sf::RenderWindow* GameManager::getWindow(){
 }
 
 void GameManager::run(){
+	//Create the window and GUI, then run the game loop.
+	//The game loop handles events, updates GUI, and renders everything.
 	sf::VideoMode vm(1024, 768);
-	//sf::RenderWindow window;
 	window_.create(vm, game_name_);
 
 	window_.resetGLStates();
@@ -97,12 +95,13 @@ void GameManager::run(){
 	while (!exit_){
 		sf::Event evt;
 		while (window_.pollEvent(evt)){
-			pass_click_to_sfml = true;
+			pass_click_to_sfml = true; //See sfguiClicked function.
 			gui_->handleEvent(evt);
 			if (evt.type == sf::Event::Closed){
-				exit_ = true;
+				exit_ = true; //Exits game loop if the window is closed.
 			}
 			else if (pass_click_to_sfml && evt.type == sf::Event::MouseButtonPressed){
+				//If the GUI was not clicked then the button pressed event was clicking in the window, so fire the mouse clicked event.
 				mouseClicked(evt.mouseButton.button, maths::Vector2(evt.mouseButton.x, evt.mouseButton.y));
 			}
 			else if (evt.type == sf::Event::KeyPressed){
@@ -121,6 +120,8 @@ void GameManager::run(){
 }
 
 void GameManager::removeObject(std::string name){
+	//Removes the entire object from the game.
+	//Remove all placed entities of that object, then remove the object.
 	for (auto& it = entities_.begin(); it != entities_.end();){
 		if ((*it)->getType().getName() == name){
 			it = entities_.erase(it);
@@ -177,6 +178,7 @@ void GameManager::removeSound(std::string name){
 
 void GameManager::loadGameFromFile(std::string gamefile){
 	//Read gamefile to store game properties (objects, sprites, etc)
+	//Explanation of loading algorithm is in documentaton
 	using namespace std;
 
 	textures_.clear();
@@ -197,11 +199,11 @@ void GameManager::loadGameFromFile(std::string gamefile){
 
 	while (getline(fin, line)){
 		if (line.length() > 0 && line[0] != '#'){ //ignore commented lines
-			//Check if prefix signifies that the next line is a saved value
+			//Check if prefix signifies that the next line is a saved value, and if so, set that property of the current object
 			if (prefix == PREFIX_PROP){
 				if (type == TYPE_OBJ){
 					std::string p = line;
-					if (p[0] == '\''){ //if property starts with ', it is in quotes, so we need to remove quotes
+					if (p[0] == '\''){ //if property starts with single quote, it is in quotes, so we need to remove quotes
 						p = p.substr(1, p.length()-2);
 					}
 					current_obj->setProperty(prop, p);
@@ -245,7 +247,7 @@ void GameManager::loadGameFromFile(std::string gamefile){
 				istringstream s(line);
 				string word;
 				for (int i = 0; s >> word; i++){
-					//check if word is a prefix
+					//check if line starts with a prefix
 					if (word == "$type"){
 						prefix = PREFIX_TYPE;
 					}
@@ -257,6 +259,7 @@ void GameManager::loadGameFromFile(std::string gamefile){
 					}
 					else{
 						if (prefix == PREFIX_TYPE){
+							//if the prefix was $type then create the corresponding object and store it in a container
 							if (word == "obj"){
 								type = TYPE_OBJ;
 								current_obj = new Object();
@@ -307,6 +310,7 @@ void GameManager::loadGameFromFile(std::string gamefile){
 }
 
 void GameManager::updateAllEntitySprites(Object* object){
+	//Called when the texture of an object is changed. Update all sprites of the entities of the object to reflect texture change.
 	for (auto& it : entities_){
 		if (it->getType().getName() == object->getName()){
 			it->updateSprite();
@@ -315,9 +319,11 @@ void GameManager::updateAllEntitySprites(Object* object){
 }
 
 void GameManager::objectSelected(std::string name){
+	//Called when the object is selected in the GUI.
 	selected_ = getObjectByName(name);
 }
 
+//Add item to the GUI object browser.
 void GameManager::addObjToGui(Object* object){
 	gui_->objectAdded(object->getName());
 }
@@ -334,6 +340,7 @@ void GameManager::addScriptToGui(Script* script){
 	gui_->scriptAdded(script->getName());
 }
 
+//Add item to container.
 void GameManager::addEntity(Entity* entity){
 	entities_.push_back(std::unique_ptr<Entity>(entity));
 }
@@ -356,21 +363,8 @@ void GameManager::addScript(Script* script){
 
 void GameManager::keyPressed(sf::Keyboard::Key key){
 	using namespace sf;
-	if (key == Keyboard::Q){
-		//gui_->objectSelected(objects_[selected_]->);
-	}
-	else if (key == Keyboard::S){
-		//saveLevel("testgame.level");
-	}
-	else if (key == Keyboard::P){
-		//saveGame("testgame2.game");
-	}
-	else if (key == Keyboard::L){
-		//loadLevelFromFile("testgame.level");
-	}
-	else if (key == Keyboard::O){
-		//loadGameFromFile("testgame2.game");
-	}
+	//Fires when key is pressed
+	//Nothing needs to be done
 }
 
 void GameManager::removeEntity(maths::Vector2 position){
@@ -385,6 +379,8 @@ void GameManager::removeEntity(maths::Vector2 position){
 }
 
 void GameManager::mouseClicked(sf::Mouse::Button button, maths::Vector2 mousePosition){
+	//If left click, place the selected object at the position of the mouse
+	//If right click, remove the object at the position of the mouse
 	using namespace sf;
 	if (button == Mouse::Left && selected_ != NULL){
 		addEntity(new Entity(this, selected_, mousePosition));
@@ -401,6 +397,8 @@ void GameManager::render(sf::RenderWindow* window){
 }
 
 void GameManager::loadLevelFromFile(std::string filename){
+	//Loads level (placed entities) from file.
+	//Explanation of this function is in documentation.
 	using namespace std;
 	ifstream fin(filename);
 	string line;
@@ -417,6 +415,7 @@ void GameManager::loadLevelFromFile(std::string filename){
 		Entity* current_entity = NULL;
 		for (int i = 0; s >> word; i++){
 			if (type == TYPE_NONE){
+				//If no type has been set yet and the word is 'obj', create an entity.
 				if (word == "obj"){
 					type = TYPE_OBJ;
 					current_entity = new Entity(this);
@@ -428,6 +427,7 @@ void GameManager::loadLevelFromFile(std::string filename){
 				if (prefix == PREFIX_NONE){
 					prefix = PREFIX_NEXT;
 				}
+				//If a type has been given, switch prefix to prefix read from file.
 				else if (prefix == PREFIX_NEXT){
 					if (word == "name"){
 						prefix = PREFIX_NAME;
@@ -437,14 +437,17 @@ void GameManager::loadLevelFromFile(std::string filename){
 					}
 				}
 				else if (prefix == PREFIX_NAME){
+					//Set the type of the object if "name" was the prefix.
 					current_entity->setType(getObjectByName(word));
 					prefix = PREFIX_NEXT;
 				}
 				else if (prefix == PREFIX_POSX){
+					//Set the x position of the object if "pos" was the prefix, then set the prefix to set y position.
 					current_entity->setPosition(maths::Vector2(stod(word), current_entity->getPosition().y));
 					prefix = PREFIX_POSY;
 				}
 				else if (prefix == PREFIX_POSY){
+					//Set y position, which will be set as the prefix after the x position is set.
 					current_entity->setPosition(maths::Vector2(current_entity->getPosition().x, stod(word)));
 					prefix = PREFIX_NEXT;
 				}
@@ -454,9 +457,12 @@ void GameManager::loadLevelFromFile(std::string filename){
 }
 
 void GameManager::saveLevel(std::string filename){
+	//Saves level (placed entities) to file.
+	//For each entity, save it on a separate line with the string: 'obj name [object name] pos [x position] [y position]'
+
 	using namespace std;
 	ofstream fout(filename);
-	//TODO error message
+	
 	for (auto& it : entities_){
 		string name = it->getType().getName();
 		maths::Vector2 pos = it->getPosition();
@@ -472,15 +478,18 @@ void GameManager::setGameName(std::string name){
 }
 
 void GameManager::saveGame(std::string filename){
+	//Save game (items and properties) to file.
+	//Explanation of this function is in documentation.
 	using namespace std;
 	ofstream fout(filename);
 
+	//Start game file with the string of the game name.
 	string game_str = "$type game\n$name\n" + game_name_ + "\n\n";
 
 	fout << game_str;
 
 	for (auto& it : objects_){
-		//check for blank properties
+		//Check for blank properties, and display a warning if one was found.
 		bool blank = false;
 		for (auto& prop : it->getProperties()){
 			if (prop.second == ""){
@@ -492,7 +501,7 @@ void GameManager::saveGame(std::string filename){
 			}
 		}
 
-		if (!blank){
+		if (!blank){ //Don't save objects with blank properties.
 			string s = "$type obj\n";
 			s += "$name\n";
 			s += it->getName() + "\n";
@@ -511,7 +520,7 @@ void GameManager::saveGame(std::string filename){
 	}
 	
 	for (auto& it : textures_){
-		if (it->getFilename() == ""){
+		if (it->getFilename() == ""){ //Don't save textures with a blank filename.
 			NotificationWindow* note = new NotificationWindow(gui_.get(), "Warning: Texture not saved", "The file name in texture " + it->getName() + " was left blank. This texture was not saved.");
 		}
 		else{
@@ -526,7 +535,7 @@ void GameManager::saveGame(std::string filename){
 	}
 
 	for (auto& it : scripts_){
-		if (it->getFilename() == ""){
+		if (it->getFilename() == ""){ //Don't save scripts with a blank filename.
 			NotificationWindow* note = new NotificationWindow(gui_.get(), "Warning: Script not saved", "The file name in script " + it->getName() + " was left blank. This script was not saved.");
 		}
 		else{
@@ -541,7 +550,7 @@ void GameManager::saveGame(std::string filename){
 	}
 
 	for (auto& it : sounds_){
-		if (it->getFilename() == ""){
+		if (it->getFilename() == ""){ //Don't save sounds with a blank filename.
 			NotificationWindow* note = new NotificationWindow(gui_.get(), "Warning: Sound not saved", "The file name in sound " + it->getName() + " was left blank. This sound was not saved.");
 		}
 		else{

@@ -17,11 +17,14 @@ Entity::~Entity(){
 }
 
 void Entity::setType(Object* type){
+	//Change the Object type of the entity.
+	//Update the sprite in case the new type has a different texture, so the sprite would need to be reloaded.
 	type_ = type;
 	updateSprite();
 }
 
 void Entity::updateSprite(){
+	//Set the sprite to have the texture described by the type of the entity if it exists.
 	std::string texname = type_->getProperty("texture");
 	Texture* tex = gameManager_->getTextureByName(texname);
 	if (tex != NULL){

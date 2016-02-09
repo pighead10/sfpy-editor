@@ -27,6 +27,8 @@ void Gui::update(int elapsed){
 }
 
 void Gui::subscribeWidgetClicked(sfg::Widget::Ptr widget){
+	//Tell a widget to let GameManager know whenever something has been clicked so that it can separate GUI clicks from game clicks
+	//This needs to be called for every widget
 	widget->GetSignal(sfg::Widget::OnMouseLeftPress).Connect(std::bind(&GameManager::sfguiClicked, game_manager_));
 }
 
@@ -55,6 +57,7 @@ void Gui::removeWindow(PropertyWindow* window){
 }
 
 MenuItem* Gui::getMenuItem(std::string name,GUI_TYPE type){
+	//Returns the menu item with the given name and type (each type is in a different tab in the GUI)
 	for (auto& it : menu_list_){
 		if (it->getName() == name && it->getType() == type){
 			return it.get();
@@ -65,6 +68,8 @@ MenuItem* Gui::getMenuItem(std::string name,GUI_TYPE type){
 }
 
 void Gui::itemSelected(std::string name, GUI_TYPE type){
+	//Called when a menu item is selected
+	//Set the relevant menu item and window to active, and create a property window for the selected object
 	using namespace sfg;
 
 	for (auto& it : menu_list_){
@@ -106,6 +111,7 @@ void Gui::itemSelected(std::string name, GUI_TYPE type){
 	window_list_.push_back(std::unique_ptr<PropertyWindow>(window));
 }
 
+//Add a menu item to the relevant GUI tab and increase the counter
 void Gui::objectAdded(std::string name){
 	MenuItem* item = new MenuItem(this, name,GUI_OBJECT);
 	obj_box_->Pack(item->getButton());
@@ -135,6 +141,9 @@ void Gui::soundAdded(std::string name){
 }
 
 std::string Gui::getNextItemName(int count,std::string name,GUI_TYPE type){
+	//Returns name followed by the next available number such that the name is not in use
+	//E.g. if "Obj1" and "Obj2" exist, then when this function is called with name = "Obj", it will return "Obj3"
+	//Count is the starting number to use
 	for (int n = count;;n++){
 		std::string s = name + std::to_string(n);
 		if (getMenuItem(s, type) == NULL){
@@ -164,7 +173,8 @@ void Gui::removeWindow(std::string name, GUI_TYPE type){
 	std::cout << "ERROR: Attempting to remove window item " << name << " that doesn't exist." << std::endl;
 }
 
-//these are separate functions are different objects may need different behaviour in future
+//Remove all GUIs relating to the item (menu item and window)
+//These are separate functions as different types may need different behaviour in future
 void Gui::removeObject(std::string name){
 	removeMenuItem(name, GUI_OBJECT);
 	removeWindow(name, GUI_OBJECT);
@@ -186,8 +196,12 @@ void Gui::removeScript(std::string name){
 }
 
 void Gui::fileMenuSelect(){
-	int selected = file_->GetSelectedItem();
-	if (selected == 1){ //add object
+	//Called when an item from the file menu is selected
+	//Do the action corresponding to the selected item
+
+	int selected = file_->GetSelectedItem(); //Gets number of item selected. '0' is the file item, the rest are in order of display on the drop down menu.
+	if (selected == 1){ //Add object
+		//Create an object, set its default properties and name, and add it to the GUI and GameManager
 		Object* obj = new Object();
 		std::string n = getNextItemName(objcount_, "Obj", GUI_OBJECT);
 		obj->setName(n);
@@ -201,7 +215,8 @@ void Gui::fileMenuSelect(){
 		game_manager_->addObject(obj);
 		objectAdded(n);
 	}
-	else if (selected == 2){ //add texture
+	else if (selected == 2){ //Add texture
+		//Create a texture, set its default properties and name, and add it to the GUI and GameManager
 		Texture* tex = new Texture();
 		std::string n = getNextItemName(texcount_, "Tex", GUI_TEXTURE);
 		tex->setName(n);
@@ -209,7 +224,8 @@ void Gui::fileMenuSelect(){
 		game_manager_->addTexture(tex);
 		textureAdded(n);
 	}
-	else if (selected == 3){ //add sounds
+	else if (selected == 3){ //Add sound
+		//Create a sound, set its default properties and name, and add it to the GUI and GameManager
 		Sound* sound = new Sound();
 		std::string n = getNextItemName(soundcount_, "Sound", GUI_SOUND);
 		sound->setName(n);
@@ -217,7 +233,8 @@ void Gui::fileMenuSelect(){
 		game_manager_->addSound(sound);
 		soundAdded(n);
 	}
-	else if (selected == 4){ //add scripts
+	else if (selected == 4){ //Add script
+		//Create a script, set its default properties and name, and add it to the GUI and GameManager
 		Script* script = new Script();
 		std::string n = getNextItemName(scriptcount_, "Script", GUI_SCRIPT);
 		script->setName(n);
@@ -225,20 +242,31 @@ void Gui::fileMenuSelect(){
 		game_manager_->addScript(script);
 		scriptAdded(n);
 	}
-	else if (selected == 5){ //save
+	else if (selected == 5){ //Save
 		save();
 	}
-	else if (selected == 6){ //save as
+	else if (selected == 6){ //Save as
 		saveAs();
 	}
-	else if (selected == 7){ //load
+	else if (selected == 7){ //Load
 		load();
 	}
-	else if (selected == 8){ //play game
+	else if (selected == 8){ //Play game
 		playGame();
 	}
-	file_->SelectItem(0);
+	file_->SelectItem(0); //Return the GUI to displaying "File"
 }
+
+/*Requesting delete functions:
+requestDelete[item](name):
+Called when user clicks "Delete" in the item's property window. Display a warning message and connect the message to the yes and no funtions.
+
+delete[item]_yes(name):
+Called if the user clicks "Yes" to the warning message. Remove the object from the GameManager and from the GUI.
+
+delete[item]_no(name):
+Called if the user clicks "No" to the warning message.
+*/
 
 void Gui::requestDeleteObject(std::string name){
 	using namespace sfg;
@@ -322,6 +350,7 @@ void Gui::deleteScript_no(std::string name){
 }
 
 void Gui::clearAll(){
+	//Clear all GUI elements and reset everything to default values.
 	window_list_.clear();
 	menu_list_.clear();
 	objcount_ = 0;
@@ -332,6 +361,7 @@ void Gui::clearAll(){
 }
 
 bool Gui::isNameValid(std::string name) const{
+	//Checks if name starts with an alphanumeric character and contains only alphanumeric characters, - and _.
 	bool valid = true;
 	if (name == ""){
 		valid = false;
@@ -351,6 +381,8 @@ bool Gui::isNameValid(std::string name) const{
 }
 
 void Gui::save(){
+	//Called if user clicks "Save" from file menu.
+	//If no save name has been set, run the Save as functionality, otherwise set the game name and save the level and game.
 	if (save_name_ == ""){
 		saveAs();
 	}
@@ -362,11 +394,14 @@ void Gui::save(){
 }
 
 void Gui::saveAs(){
+	//Display a message prompting user to enter in file name and connect it to the selected function.
 	TextDialogBox* box = new TextDialogBox(this, "Save file as", "Enter file path and name for your game to be saved as. No file extension is necessary (e.g: 'examples/mygame'). Leave blank to cancel.",
 		std::bind(&Gui::saveFileSelected, this, std::placeholders::_1));
 }
 
 void Gui::saveFileSelected(std::string filename){
+	//Called once user clicks "Apply" in the save box.
+	//If the file name is blank, do nothing, otherwise check if the name is valid then save the game or display a warning message.
 	if (filename != ""){
 		if (!isNameValid(filename)){
 			NotificationWindow* note = new NotificationWindow(this, "Invalid name", "Invalid name. Make sure it starts with a letter and contains only alphanumeric characters, -, or _.");
@@ -379,11 +414,14 @@ void Gui::saveFileSelected(std::string filename){
 }
 
 void Gui::load(){
+	//Display a message prompting user to enter in file name and connect it to the selected function.
 	TextDialogBox* box = new TextDialogBox(this, "Load game", "Enter file path and name for the game you want to load. No file extension is necessary (e.g: 'examples/mygame'). Leave blank to cancel.",
 		std::bind(&Gui::loadFileSelected, this, std::placeholders::_1));
 }
 
 void Gui::loadFileSelected(
+	//Called once user clicks "Apply" in the load box.
+	//Do nothing if the file name was left blank, otherwise check if the file name is valid and clear the GUI and load the game and level, or display a warning message.
 	std::string filename){
 	if (filename != ""){
 		if (!isNameValid(filename)){
@@ -399,11 +437,15 @@ void Gui::loadFileSelected(
 }
 
 void Gui::playGame(){
+	//Called once user clicks "Play game" from file menu.
+	//Run a system command with the exe file of the game running exe file with the command line argument of the save file name.
 	std::string command = "sfpy-gmk.exe " + save_name_;
 	system(command.c_str());
 }
 
 void Gui::run(){
+	//Set up GUI and create constant elements - object browser window with tabs for objects/textures/sounds/scripts and the file menu.
+
 	using namespace sfg;
 
 	auto window = Window::Create();
@@ -446,20 +488,4 @@ void Gui::run(){
 
 	menubox->Pack(file_);
 	desktop.Add(menubox);
-
-
-	/*label_ = Label::Create("Hello world!");
-
-	auto button = Button::Create("Greet sfgui!");
-	button->GetSignal(Widget::OnLeftClick).Connect(std::bind(&Gui::onButtonClick, this));
-
-	auto box = Box::Create(Box::Orientation::VERTICAL, 5.0f);
-	box->Pack(label_);
-	box->Pack(button, false);
-
-	auto window = Window::Create();
-	window->SetTitle("Hello world!");
-	window->Add(box);
-
-	desktop.Add(window);*/
 }

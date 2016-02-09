@@ -10,6 +10,7 @@ ConfirmationWindow::ConfirmationWindow(Gui* parent,std::string title, std::strin
 
 ConfirmationWindow::~ConfirmationWindow(){
 	using namespace sfg;
+	//Remove the confirmation window from the GUI upon deletion.
 	auto widget = Context::Get().GetActiveWidget();
 
 	while (widget->GetName() != "Window"){
@@ -19,6 +20,7 @@ ConfirmationWindow::~ConfirmationWindow(){
 
 }
 
+//Run yes or no function when clicked, then delete the confirmation window.
 void ConfirmationWindow::yesSelected(){
 	yesfunc_(arg_);
 	delete this;
@@ -30,6 +32,8 @@ void ConfirmationWindow::noSelected(){
 }
 
 void ConfirmationWindow::initgui(std::string title,std::string message){
+	//Create window with message, title, yes/no buttons, and link the buttons to the selected member functions.
+
 	using namespace sfg;
 	window_ = Window::Create();
 	window_->SetTitle(title);
